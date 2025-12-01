@@ -10,9 +10,27 @@ const LoginPage = () => {
   const [password , setPassword] = useState("")
   const [bio , setBio] = useState("")
   const [isDataSubmitted , setIsDataSubmitted] = useState(false);
-
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const {login} = useContext(AuthContext);
+
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email) && !email.includes(' ');
+  };
+
+  const isFormValid = () => {
+    if (currState === "Login") {
+      return isValidEmail(email) && password.length > 0;
+    }
+    if (currState === "Sign up" && !isDataSubmitted) {
+      return fullName.trim().length > 0 && isValidEmail(email) && password.length > 0 && isAgreed;
+    }
+    if (currState === "Sign up" && isDataSubmitted) {
+      return bio.trim().length > 0;
+    }
+    return false;
+  };
 
 
 
@@ -44,7 +62,7 @@ const LoginPage = () => {
 
       {/*------------------right --------------*/}
 
-      <form onSubmit={onSubmitHandler} className='border-2 bg-white/8 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg '>
+      <form onSubmit={onSubmitHandler} className='border-2 bg-white/8 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg w-[350px] max-w-[90vw]'>
       
       <h2 className='font-medium text-2xl flex justify-between items-center'>
         {currState} 
@@ -63,8 +81,18 @@ const LoginPage = () => {
 
         {!isDataSubmitted && (
           <>
-          <input onChange={(e)=>setEmail(e.target.value)} value={email}
-           type="email" placeholder='Email Address' required className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ' />
+          <div className='flex flex-col gap-1'>
+            <input onChange={(e)=>setEmail(e.target.value)} value={email}
+             type="email" placeholder='Email Address' required 
+             className={`p-2 border rounded-md focus:outline-none focus:ring-2 ${
+               email.length > 0 && !isValidEmail(email) 
+                 ? 'border-red-500 focus:ring-red-500' 
+                 : 'border-gray-500 focus:ring-indigo-500'
+             }`} />
+            {email.length > 0 && !isValidEmail(email) && (
+              <span className='text-red-400 text-xs'>Please enter a valid email address</span>
+            )}
+          </div>
 
            <input onChange={(e)=>setPassword(e.target.value)} value={password}
            type="password" placeholder='password' required className='p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ' />
@@ -80,16 +108,31 @@ const LoginPage = () => {
           )
         }
 
-        <button type='submit' className='py-3 bg-gradient-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer '>
+        <button 
+          type='submit' 
+          disabled={!isFormValid()}
+          className={`py-3 rounded-md transition-all ${
+            isFormValid() 
+              ? 'bg-gradient-to-r from-purple-400 to-violet-600 text-white cursor-pointer hover:opacity-90' 
+              : 'bg-gray-500 text-gray-300 cursor-not-allowed opacity-60'
+          }`}
+        >
            { currState =="Sign up" ? "Create Account" : "Login Now"}
         </button>
 
-        <div className='flex items-center gap-2 text-sm text-gray-500'>
-          <input type="checkbox" />
-          <p>
-            Agree to the terms of the use of the privacy policy
-          </p>
-        </div>
+        {currState === "Sign up" && !isDataSubmitted && (
+          <div className='flex items-start gap-2 text-sm text-gray-500'>
+            <input 
+              type="checkbox" 
+              checked={isAgreed}
+              onChange={(e) => setIsAgreed(e.target.checked)}
+              className='cursor-pointer mt-1'
+            />
+            <p>
+              Agree to the terms of the use of the privacy policy
+            </p>
+          </div>
+        )}
 
         <div className='flex flex-col gap-2'>
 
