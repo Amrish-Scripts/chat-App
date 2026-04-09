@@ -56,14 +56,6 @@ app.use(cors());
 
 
 //Routes setup
-// Root URL: browsers open "/" — without this, Express returns "Cannot GET /"
-app.get("/", (req, res) => {
-  res.json({
-    ok: true,
-    message: "Chat API is running",
-    docs: "Use /api/status, /api/auth, and /api/messages. For the web UI, deploy the Vite app (client/) and set VITE_BACKEND_URL to this API URL.",
-  });
-});
 app.use("/api/status", (req,res)=> res.send("server is live"))
 app.use("/api/auth",userRouter)
 app.use("/api/messages",messageRouter)
